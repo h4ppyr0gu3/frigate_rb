@@ -1,0 +1,20 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "dotenv/load"
+require "bundler/setup"
+require "frigate_rb"
+require "irb"
+
+FrigateRb.configure do |config|
+  config.frigate_https_url = ENV["FRIGATE_HTTPS_URL"]
+  config.frigate_username = ENV["FRIGATE_USERNAME"]
+  config.frigate_password = ENV["FRIGATE_PASSWORD"]
+  config.frigate_mqtt_url = ENV["FRIGATE_MQTT_URL"]
+end
+
+puts "--- Starting MQTT Listener ---"
+
+FrigateRb::Mqtt::Listener.run do |type, object|
+  puts type if type.exclude?("frigate")
+end

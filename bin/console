@@ -1,0 +1,25 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "dotenv/load"
+require "bundler/setup"
+require "frigate_rb"
+require "irb"
+
+FrigateRb.configure do |config|
+  config.frigate_https_url = ENV["FRIGATE_HTTPS_URL"]
+  config.frigate_username = ENV["FRIGATE_USERNAME"]
+  config.frigate_password = ENV["FRIGATE_PASSWORD"]
+end
+
+ten_events = FrigateRb::Event.where({ limit: 10 })
+
+def ten_events
+  FrigateRb::Event.where({ limit: 10 })
+end
+
+puts "--- Starting IRB Console ---"
+puts "The collection is available as the variable 'ten_events'."
+
+TOPLEVEL_BINDING.local_variable_set(:ten_events, ten_events)
+IRB.start(__FILE__)
