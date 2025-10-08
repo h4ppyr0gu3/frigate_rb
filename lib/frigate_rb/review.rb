@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require_relative "types/review"
 require_relative "utils"
 
 module FrigateRb
@@ -10,28 +9,33 @@ module FrigateRb
 
     def self.all
       response = FrigateRb::Client.instance.get(FrigateRb::Endpoints.reviews)
-
-      reviews = response.body.map do |review|
-        FrigateRb::Types::Review.new(review)
-      end
-
-      wrap_response(reviews)
+      parsed_response(response, FrigateRb::Types::Review)
     end
 
     def self.find(id)
       response = FrigateRb::Client.instance.get(FrigateRb::Endpoints.review(id))
-
-      FrigateRb::Types::Review.new(response.body)
+      parsed_response(response, FrigateRb::Types::Review)
     end
 
     def self.where(params = {})
       response = FrigateRb::Client.instance.get(FrigateRb::Endpoints.reviews, params)
+      parsed_response(response, FrigateRb::Types::Review)
+    end
 
-      reviews = response.body.map do |review|
-        FrigateRb::Types::Review.new(review)
-      end
+    def self.from_event(event_id)
+      response = FrigateRb::Client.instance.get(
+        FrigateRb::Endpoints.review_from_event(event_id)
+      )
 
-      wrap_response(reviews)
+      parsed_response(response, FrigateRb::Types::Review)
+    end
+
+    def self.multiple_reviewed(ids)
+      response = FrigateRb::Client.instance.post(
+        FrigateRb::Endpoints.multiple_reviewed, { ids: ids }
+      )
+
+      parsed_response(response, FrigateRb::Types::Success)
     end
   end
 end

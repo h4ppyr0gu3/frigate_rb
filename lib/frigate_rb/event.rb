@@ -10,28 +10,25 @@ module FrigateRb
 
     def self.all
       response = FrigateRb::Client.instance.get(FrigateRb::Endpoints.events)
-
-      events = response.body.map do |event|
-        FrigateRb::Types::Event.new(event)
-      end
-
-      wrap_response(events)
+      parsed_response(response, FrigateRb::Types::Event)
     end
 
     def self.find(id)
       response = FrigateRb::Client.instance.get(FrigateRb::Endpoints.event(id))
+      parsed_response(response, FrigateRb::Types::Event)
+    end
 
-      FrigateRb::Types::Event.new(response.body)
+    def self.find_by_ids(ids)
+      response = FrigateRb::Client.instance.get(
+        FrigateRb::Endpoints.event_ids,
+        { ids: ids.join(",") }
+      )
+      parsed_response(response, FrigateRb::Types::Event)
     end
 
     def self.where(params = {})
       response = FrigateRb::Client.instance.get(FrigateRb::Endpoints.events, params)
-
-      events = response.body.map do |event|
-        FrigateRb::Types::Event.new(event)
-      end
-
-      wrap_response(events)
+      parsed_response(response, FrigateRb::Types::Event)
     end
   end
 end
