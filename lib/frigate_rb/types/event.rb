@@ -1,9 +1,13 @@
 # frozen_string_literal: true
 
+require_relative "type_utils"
+
 module FrigateRb
   module Types
     # Type of Event data that comes from frigate
     class Event
+      include TypeUtils
+
       attr_accessor :id, :camera, :label, :zones, :start_time, :end_time, :has_clip, :has_snapshot, :plus_id,
                     :retain_indefinitely, :sub_label, :top_score, :false_positive, :box, :data, :thumbnail
 
@@ -12,9 +16,8 @@ module FrigateRb
         @camera = data[:camera]
         @label = data[:label]
         @zones = data[:zones]
-        @start_time = Time.at(data[:start_time])
-        # end time isn't present in the beginning
-        @end_time = Time.at(data[:end_time]) if data[:end_time].present?
+        @start_time = try_parse_date(data, :start_time)
+        @end_time = try_parse_date(data, :end_time)
         @has_clip = data[:has_clip]
         @has_snapshot = data[:has_snapshot]
         @plus_id = data[:plus_id]
@@ -39,7 +42,11 @@ module FrigateRb
       end
 
       def mark_as_reviewed
-        FrigateRb::Review.multiple_reviewed([id])
+        review = FrigateRb::Review.from_event(id)
+        return unless review.is_a?(FrigateRb::Types::Review)
+
+        review_id = review.id
+        FrigateRb::Review.multiple_reviewed([review_id])
       end
     end
   end

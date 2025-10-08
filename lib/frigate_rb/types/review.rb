@@ -1,8 +1,11 @@
 # frozen_string_literal: true
 
+require_relative "type_utils"
+
 module FrigateRb
   module Types
     class Review
+      include TypeUtils
       attr_reader :id, :camera, :start_time, :end_time, :severity, :thumb_path, :data, :has_been_reviewed
 
       def initialize(type)
