@@ -9,7 +9,8 @@ module FrigateRb
       include TypeUtils
 
       attr_accessor :id, :camera, :label, :zones, :start_time, :end_time, :has_clip, :has_snapshot, :plus_id,
-                    :retain_indefinitely, :sub_label, :top_score, :false_positive, :box, :data, :thumbnail
+                    :retain_indefinitely, :sub_label, :top_score, :false_positive, :box, :data, :thumbnail,
+                    :recognized_license_plate, :recognized_license_plate_score, :score
 
       def initialize(data) # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
         @id = data[:id]
