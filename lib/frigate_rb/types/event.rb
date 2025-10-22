@@ -24,10 +24,13 @@ module FrigateRb
         @retain_indefinitely = data[:retain_indefinitely]
         @sub_label = data[:sub_label]
         @top_score = data[:top_score]
+        @score = data[:score]
         @false_positive = data[:false_positive]
         @box = data[:box]
         @data = data[:data]
         @thumbnail = data[:thumbnail]
+        @recognized_license_plate = data[:recognized_license_plate]
+        @recognized_license_plate_score = data[:recognized_license_plate_score]
       end
 
       def clip
