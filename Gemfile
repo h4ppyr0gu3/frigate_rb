@@ -15,4 +15,3 @@ gem "rubocop", "~> 1.21"
 gem "rubocop-ordered_methods", "~> 0.14"
 
 gem "activesupport", "~> 8.0"
-
