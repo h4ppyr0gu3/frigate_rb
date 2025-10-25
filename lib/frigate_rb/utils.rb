@@ -27,6 +27,8 @@ module FrigateRb
     def handle_response(response, type)
       if response.body.is_a?(Array)
         wrap_response(response.body, type)
+      elsif response.body.is_a?(String)
+        type.new(JSON.parse(response.body))
       else
         type.new(response.body)
       end

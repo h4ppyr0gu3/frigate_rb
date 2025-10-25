@@ -10,6 +10,7 @@ require_relative "frigate_rb/review"
 require_relative "frigate_rb/utils"
 require_relative "frigate_rb/info"
 require_relative "frigate_rb/mqtt/listener"
+require_relative "frigate_rb/faces"
 
 require "active_support"
 require "active_support/all"

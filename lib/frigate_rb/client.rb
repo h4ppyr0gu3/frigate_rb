@@ -3,6 +3,7 @@
 require "faraday"
 require "faraday-cookie_jar"
 require "faraday/net_http_persistent"
+require "faraday/multipart"
 require "singleton"
 require "pry"
 
@@ -32,10 +33,14 @@ module FrigateRb
         builder.use :cookie_jar, jar: jar
 
         builder.adapter :net_http_persistent, stream_response: true
+      end
+    end
 
-        puts "--- STREAMING CONNECTION STACK ---"
-        puts builder.adapter.inspect
-        puts "------------------------------------"
+    def create_multipart_connection(jar)
+      Faraday.new(url: FrigateRb.configuration.frigate_https_url, ssl: { verify: false }) do |builder|
+        builder.use :cookie_jar, jar: jar
+
+        builder.request :multipart
       end
     end
 
@@ -58,6 +63,17 @@ module FrigateRb
         #   }
         builder.adapter Faraday.default_adapter
       end
+    end
+
+    def post_file(path, file, type = "image/jpeg")
+      authenticate if @session_cookie.nil? || @session_expires_at < Time.now
+
+      conn = create_multipart_connection(@cookie_jar)
+      payload = {}
+
+      payload[:file] = Faraday::Multipart::FilePart.new(file, type)
+
+      conn.post(path, payload)
     end
 
     def authenticate # rubocop:disable Metrics/MethodLength

@@ -4,6 +4,7 @@ PATH
     frigate_rb (0.1.0)
       faraday (~> 2.14)
       faraday-cookie_jar (~> 0.0.7)
+      faraday-multipart
       faraday-net_http_persistent
       mqtt (~> 0.6.0)
 
@@ -43,6 +44,8 @@ GEM
     faraday-cookie_jar (0.0.7)
       faraday (>= 0.8.0)
       http-cookie (~> 1.0.0)
+    faraday-multipart (1.1.1)
+      multipart-post (~> 2.0)
     faraday-net_http (3.4.1)
       net-http (>= 0.5.0)
     faraday-net_http_persistent (2.3.1)
@@ -64,6 +67,7 @@ GEM
     method_source (1.1.0)
     minitest (5.25.5)
     mqtt (0.6.0)
+    multipart-post (2.4.1)
     net-http (0.6.0)
       uri
     net-http-persistent (4.0.6)

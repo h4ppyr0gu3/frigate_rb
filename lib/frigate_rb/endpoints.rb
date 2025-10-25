@@ -6,10 +6,13 @@ module FrigateRb
   class Endpoints
     class << self
       def config_schema = "/api/config/schema.json"
+      def create_face(name) = "/api/faces/#{name}/create"
       def event(id) = "/api/events/#{id}"
       def event_clip(id) = "/api/events/#{id}/clip.mp4"
       def event_ids = "/api/event_ids"
       def events = "/api/events"
+      def face_clip(face_name, file_name) = "/clips/faces/#{face_name}/#{file_name}"
+      def faces = "/api/faces"
       def ffprobe = "/api/ffprobe"
       def go2rtc_streams = "/api/go2rtc/streams"
       def health = "/api"
@@ -20,10 +23,12 @@ module FrigateRb
       def multiple_reviewed = "/api/reviews/viewed"
       def nvinfo = "/api/nvinfo"
       def recognized_license_plates = "/api/recognized_license_plates"
+      def register_face(name) = "/api/faces/#{name}/register"
       def review(id) = "/api/review/#{id}"
       def review_from_event(event_id) = "/api/review/event/#{event_id}"
       def reviews = "/api/review"
       def stats = "/api/stats"
+      def train_face(name) = "/api/faces/train/#{name}/classify"
       def vainfo = "/api/vainfo"
       def version = "/api/version"
     end
