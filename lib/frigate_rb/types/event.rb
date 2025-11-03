@@ -10,7 +10,8 @@ module FrigateRb
 
       attr_accessor :id, :camera, :label, :zones, :start_time, :end_time, :has_clip, :has_snapshot, :plus_id,
                     :retain_indefinitely, :sub_label, :top_score, :false_positive, :box, :data, :thumbnail,
-                    :recognized_license_plate, :recognized_license_plate_score, :score
+                    :recognized_license_plate, :recognized_license_plate_score, :score, :current_zones,
+                    :entered_zones
 
       def initialize(data) # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
         @id = data[:id]
@@ -27,6 +28,8 @@ module FrigateRb
         @top_score = data[:top_score]
         @score = data[:score]
         @false_positive = data[:false_positive]
+        @current_zones = data[:current_zones]
+        @entered_zones = data[:entered_zones]
         @box = data[:box]
         @data = data[:data]
         @thumbnail = data[:thumbnail]

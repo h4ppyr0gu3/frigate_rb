@@ -17,6 +17,7 @@ module FrigateRb
       def go2rtc_streams = "/api/go2rtc/streams"
       def health = "/api"
       def labels = "/api/labels"
+      def latest_frame(camera_name) = "/api/#{camera_name}/latest.jpg"
       def login = "/api/login"
       def logs(service) = "/api/logs/#{service}"
       def metrics = "/api/metrics"
