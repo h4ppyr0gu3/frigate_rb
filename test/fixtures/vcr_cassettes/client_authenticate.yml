@@ -1,0 +1,25 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: https://localhost:8971/api/login
+    body:
+      encoding: UTF-8
+      string: '{"user":"admin","password":"secret"}'
+    headers:
+      Content-Type:
+      - application/json
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Set-Cookie:
+      - frigate_token=abc123; Path=/; HttpOnly; Secure; Expires=Wed, 31 Dec 2099 23:59:59 GMT
+      Content-Type:
+      - application/json
+    body:
+      encoding: UTF-8
+      string: '{"success":true}'
+  recorded_at: Wed, 01 Jan 2025 00:00:00 GMT
+recorded_with: VCR 6.2.0

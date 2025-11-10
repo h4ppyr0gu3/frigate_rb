@@ -9,10 +9,12 @@ module FrigateRb
       attr_reader :id, :camera, :start_time, :end_time, :severity, :thumb_path, :data, :has_been_reviewed
 
       def initialize(type)
+        type = type.deep_symbolize_keys if type.respond_to?(:deep_symbolize_keys)
+
         @id = type[:id]
         @camera = type[:camera]
-        @start_time = Time.at(type[:start_time])
-        @end_time = Time.at(type[:end_time])
+        @start_time = try_parse_date(type, :start_time)
+        @end_time = try_parse_date(type, :end_time)
         @severity = type[:severity]
         @thumb_path = type[:thumb_path]
         @data = type[:data]

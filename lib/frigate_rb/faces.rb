@@ -16,7 +16,7 @@ module FrigateRb
     def self.create(name)
       url = FrigateRb::Endpoints.create_face(name)
 
-      response = FrigateRb::Client.instance.post(FrigateRb::Endpoints.create_face(name))
+      response = FrigateRb::Client.instance.post(url)
       parsed_response(response, FrigateRb::Types::Face)
     end
 

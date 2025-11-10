@@ -15,3 +15,8 @@ gem "rubocop", "~> 1.21"
 gem "rubocop-ordered_methods", "~> 0.14"
 
 gem "activesupport", "~> 8.0"
+
+gem "minitest"
+
+gem "webmock", "~> 3.19"
+gem "vcr", "~> 6.2"

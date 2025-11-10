@@ -39,6 +39,7 @@ module FrigateRb
     end
 
     def last(len = nil)
+      return @records.last if len.nil?
       @records.last(len)
     end
   end
