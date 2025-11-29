@@ -26,5 +26,5 @@ jobs:
         gem build *.gemspec
         gem push --key github --host https://rubygems.pkg.github.com/${OWNER} *.gem
       env:
-        GEM_HOST_API_KEY: "Bearer ${{secrets.GITHUB_TOKEN}}"
+        GEM_HOST_API_KEY: "Bearer ${{secrets.PACKAGE_PAT}}"
         OWNER: ${{ github.repository_owner }}
