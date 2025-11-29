@@ -8,13 +8,15 @@ module FrigateRb
   # end
   class Configuration
     attr_accessor :frigate_https_url, :frigate_mqtt_url, :frigate_username,
-                  :frigate_password
+                  :frigate_password, :frigate_mqtt_username, :frigate_mqtt_password
 
     # class FrigateRbError < StandardError; end
 
     def initialize
       @frigate_https_url = "https://localhost:8971"
       @frigate_mqtt_url = "mqtt://localhost:1883"
+      @frigate_mqtt_username = "mqttuser"
+      @frigate_mqtt_password = "mysecretpassword"
       @frigate_username = "admin"
       @frigate_password = ""
     end

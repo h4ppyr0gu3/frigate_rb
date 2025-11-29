@@ -4,7 +4,8 @@ module FrigateRb
   module Mqtt
     class Listener
       def self.run(&block)
-        client = MQTT::Client.connect(FrigateRb.configuration.frigate_mqtt_url)
+        mqtt_link = 
+        client = MQTT::Client.connect(mqtt_uri)
         topic = ENV.fetch("MQTT_TOPIC", "frigate/#")
         client.subscribe(topic)
         client.get do |topic, message|
@@ -20,6 +21,19 @@ module FrigateRb
             yield topic, message
           end
         end
+      end
+
+      def self.mqtt_uri
+# mqtt[s]://[username][:password]@host.domain[:port]
+        auth = ""
+        if FrigateRb.configuration.frigate_mqtt_username.present? &&  FrigateRb.configuration.frigate_mqtt_username.present?
+          auth = "#{FrigateRb.configuration.frigate_mqtt_username}:#{FrigateRb.configuration.frigate_mqtt_password}@"
+        end
+
+        # handle mqtts in future
+        host_and_port = FrigateRb.configuration.frigate_mqtt_url.gsub("mqtt://", "")
+
+        "mqtt://#{auth}#{host_and_port}}"
       end
     end
   end
