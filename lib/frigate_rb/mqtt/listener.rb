@@ -33,7 +33,7 @@ module FrigateRb
         # handle mqtts in future
         host_and_port = FrigateRb.configuration.frigate_mqtt_url.gsub("mqtt://", "")
 
-        "mqtt://#{auth}#{host_and_port}}"
+        "mqtt://#{auth}#{host_and_port}"
       end
     end
   end
