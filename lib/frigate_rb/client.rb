@@ -33,7 +33,7 @@ module FrigateRb
     end
 
     def create_streaming_connection(jar)
-      Faraday.new(url: FrigateRb.configuration.frigate_https_url, ssl: { verify: false }) do |builder|
+      Faraday.new(**connection_options(streaming: true)) do |builder|
         builder.use :cookie_jar, jar: jar
 
         builder.adapter :net_http_persistent, stream_response: true
@@ -41,7 +41,7 @@ module FrigateRb
     end
 
     def create_multipart_connection(jar)
-      Faraday.new(url: FrigateRb.configuration.frigate_https_url, ssl: { verify: false }) do |builder|
+      Faraday.new(**connection_options) do |builder|
         builder.use :cookie_jar, jar: jar
 
         builder.request :multipart
@@ -49,7 +49,7 @@ module FrigateRb
     end
 
     def create_connection(jar)
-      @connection = Faraday.new(url: FrigateRb.configuration.frigate_https_url, ssl: { verify: false }) do |builder|
+      @connection = Faraday.new(**connection_options) do |builder|
         builder.use :cookie_jar, jar: jar
         builder.request :json
 
@@ -188,6 +188,21 @@ module FrigateRb
     end
 
     private
+
+    def connection_options(streaming: false)
+      config = FrigateRb.configuration
+      read_timeout = streaming ? config.stream_timeout : config.request_timeout
+
+      {
+        url: config.frigate_https_url,
+        ssl: { verify: false },
+        request: {
+          open_timeout: config.open_timeout,
+          timeout: read_timeout,
+          write_timeout: read_timeout
+        }
+      }
+    end
 
     def clear_session!
       @session_cookie = nil

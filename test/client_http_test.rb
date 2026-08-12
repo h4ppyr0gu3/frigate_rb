@@ -25,6 +25,35 @@ class ClientHttpTest < Minitest::Test
     assert_equal({ version: "0.13.1" }, resp.body)
   end
 
+  def test_connections_apply_configured_timeouts
+    FrigateRb.configure do |config|
+      config.open_timeout = 3
+      config.request_timeout = 12
+      config.stream_timeout = 95
+    end
+
+    json_conn = @client.create_connection(@client.cookie_jar)
+    assert_equal 3, json_conn.options.open_timeout
+    assert_equal 12, json_conn.options.timeout
+    assert_equal 12, json_conn.options.write_timeout
+
+    multipart_conn = @client.create_multipart_connection(@client.cookie_jar)
+    assert_equal 3, multipart_conn.options.open_timeout
+    assert_equal 12, multipart_conn.options.timeout
+    assert_equal 12, multipart_conn.options.write_timeout
+
+    stream_conn = @client.create_streaming_connection(@client.cookie_jar)
+    assert_equal 3, stream_conn.options.open_timeout
+    assert_equal 95, stream_conn.options.timeout
+    assert_equal 95, stream_conn.options.write_timeout
+  ensure
+    FrigateRb.configure do |config|
+      config.open_timeout = 5
+      config.request_timeout = 15
+      config.stream_timeout = 120
+    end
+  end
+
   def test_post_json_body
     stub_request(:post, "https://localhost:8971/api/reviews/viewed")
       .with(body: '{"ids":[1,2,3]}')

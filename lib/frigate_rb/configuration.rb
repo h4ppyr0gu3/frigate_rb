@@ -8,7 +8,8 @@ module FrigateRb
   # end
   class Configuration
     attr_accessor :frigate_https_url, :frigate_mqtt_url, :frigate_username,
-                  :frigate_password, :frigate_mqtt_username, :frigate_mqtt_password
+                  :frigate_password, :frigate_mqtt_username, :frigate_mqtt_password,
+                  :open_timeout, :request_timeout, :stream_timeout
 
     # class FrigateRbError < StandardError; end
 
@@ -19,6 +20,11 @@ module FrigateRb
       @frigate_mqtt_password = "mysecretpassword"
       @frigate_username = "admin"
       @frigate_password = ""
+      # Hung Frigate calls otherwise pin workers indefinitely.
+      @open_timeout = 5
+      @request_timeout = 15
+      # Streaming builds clip.mp4 on demand from recording segments.
+      @stream_timeout = 120
     end
   end
 end
