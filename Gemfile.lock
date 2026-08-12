@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    frigate_rb (0.1.2)
+    frigate_rb (0.1.6)
       faraday (~> 2.14)
       faraday-cookie_jar (~> 0.0.7)
       faraday-multipart

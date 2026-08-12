@@ -15,6 +15,10 @@ module FrigateRb
     include Singleton
     InvalidCredentials = Class.new(StandardError)
     FRIGATE_SESSION_COOKIE_NAME = "frigate_token"
+    # Renew slightly before the cookie's Expires so in-flight requests don't race expiry.
+    SESSION_RENEWAL_SKEW = 60
+    # Used when Frigate omits Expires on frigate_token.
+    DEFAULT_SESSION_TTL = 3600
 
     attr_accessor :session_cookie, :session_expires_at
     attr_reader :connection, :cookie_jar
@@ -66,17 +70,19 @@ module FrigateRb
     end
 
     def post_file(path, file, type = "image/jpeg")
-      authenticate if @session_cookie.nil? || @session_expires_at < Time.now
+      with_auth_retry do
+        conn = create_multipart_connection(@cookie_jar)
+        payload = {}
 
-      conn = create_multipart_connection(@cookie_jar)
-      payload = {}
+        payload[:file] = Faraday::Multipart::FilePart.new(file, type)
 
-      payload[:file] = Faraday::Multipart::FilePart.new(file, type)
-
-      conn.post(path, payload)
+        conn.post(path, payload)
+      end
     end
 
     def authenticate # rubocop:disable Metrics/MethodLength
+      clear_session!
+
       connection = self.connection
 
       payload = {
@@ -97,24 +103,27 @@ module FrigateRb
     end
 
     def get(path, params = {}, headers = {})
-      authenticate if @session_cookie.nil? || @session_expires_at < Time.now
-
-      @connection.get(path, params, headers)
+      with_auth_retry { @connection.get(path, params, headers) }
     end
 
     def post(path, body = {}, headers = {})
-      authenticate if @session_cookie.nil? || @session_expires_at < Time.now
-
-      @connection.post(path, body, headers)
+      with_auth_retry { @connection.post(path, body, headers) }
     end
 
     def stream(path, _params = {}, range_header: nil)
-      authenticate if @session_cookie.nil? || @session_expires_at < Time.now
+      ensure_authenticated!
 
-      conn = create_streaming_connection(@cookie_jar)
+      faraday_response = nil
+      2.times do |attempt|
+        conn = create_streaming_connection(@cookie_jar)
 
-      faraday_response = conn.get(path) do |req|
-        req.headers["Range"] = range_header if range_header
+        faraday_response = conn.get(path) do |req|
+          req.headers["Range"] = range_header if range_header
+        end
+
+        break if faraday_response.status != 401 || attempt.positive?
+
+        authenticate
       end
 
       proxy_headers = {
@@ -153,6 +162,16 @@ module FrigateRb
       yield headers, body
     end
 
+    def session_valid?
+      !@session_cookie.nil? &&
+        !@session_expires_at.nil? &&
+        @session_expires_at > Time.now + SESSION_RENEWAL_SKEW
+    end
+
+    def ensure_authenticated!
+      authenticate unless session_valid?
+    end
+
     def extract_session_details
       jar = @cookie_jar
 
@@ -163,9 +182,30 @@ module FrigateRb
       raise InvalidCredentials unless session_cookie_info
 
       @session_cookie = session_cookie_info.value
-      @session_expires_at = session_cookie_info.expires
+      @session_expires_at = session_cookie_info.expires || (Time.now + DEFAULT_SESSION_TTL)
 
       self
+    end
+
+    private
+
+    def clear_session!
+      @session_cookie = nil
+      @session_expires_at = nil
+      @cookie_jar.clear
+    end
+
+    def unauthorized?(response)
+      response.status == 401
+    end
+
+    def with_auth_retry
+      ensure_authenticated!
+      response = yield
+      return response unless unauthorized?(response)
+
+      authenticate
+      yield
     end
   end
 end
