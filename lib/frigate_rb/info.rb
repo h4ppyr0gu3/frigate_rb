@@ -7,14 +7,14 @@ module FrigateRb
 
     class << self
       ENDPOINT_LIST.each do |endpoint|
-        define_method endpoint do |params = {}|
-          FrigateRb::Client.instance.get(FrigateRb::Endpoints.send(endpoint), params).body
+        define_method endpoint do |params = {}, client: FrigateRb.client|
+          client.get(FrigateRb::Endpoints.send(endpoint), params).body
         end
       end
 
       # service is one of :frigate, :nginx, :go2rtc
-      def logs(service)
-        FrigateRb::Client.instance.get(FrigateRb::Endpoints.logs(service)).body
+      def logs(service, client: FrigateRb.client)
+        client.get(FrigateRb::Endpoints.logs(service)).body
       end
     end
   end

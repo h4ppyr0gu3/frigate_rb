@@ -2,8 +2,8 @@
 
 module FrigateRb
   class Camera
-    def self.latest_frame(camera_name, &block)
-      res = FrigateRb::Client.instance.get(FrigateRb::Endpoints.latest_frame(camera_name))
+    def self.latest_frame(camera_name, client: FrigateRb.client, &block)
+      res = client.get(FrigateRb::Endpoints.latest_frame(camera_name))
       file = res.body
 
       yield file

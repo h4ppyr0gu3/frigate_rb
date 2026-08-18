@@ -3,7 +3,7 @@ module FrigateRb
     class Face
       attr_reader :name
 
-      def initialize(data)
+      def initialize(data, client: nil)
         data = data.deep_symbolize_keys
 
         @name = data[:name]

@@ -8,29 +8,29 @@ module FrigateRb
   class Faces
     extend FrigateRb::Utils
 
-    def self.all
-      response = FrigateRb::Client.instance.get(FrigateRb::Endpoints.faces)
-      parsed_response(response, FrigateRb::Types::Face)
+    def self.all(client: FrigateRb.client)
+      response = client.get(FrigateRb::Endpoints.faces)
+      parsed_response(response, FrigateRb::Types::Face, client: client)
     end
 
-    def self.create(name)
+    def self.create(name, client: FrigateRb.client)
       url = FrigateRb::Endpoints.create_face(name)
 
-      response = FrigateRb::Client.instance.post(url)
-      parsed_response(response, FrigateRb::Types::Face)
+      response = client.post(url)
+      parsed_response(response, FrigateRb::Types::Face, client: client)
     end
 
-    def self.register(name, file)
-      response = FrigateRb::Client.instance.post_file(
+    def self.register(name, file, client: FrigateRb.client)
+      response = client.post_file(
         FrigateRb::Endpoints.register_face(name), file
       )
-      parsed_response(response, FrigateRb::Types::Face)
+      parsed_response(response, FrigateRb::Types::Face, client: client)
     end
 
-    def self.train(name)
-      response = FrigateRb::Client.instance.get(FrigateRb::Endpoints.train_face(name))
+    def self.train(name, client: FrigateRb.client)
+      response = client.get(FrigateRb::Endpoints.train_face(name))
       pp response
-      parsed_response(response, FrigateRb::Types::Face)
+      parsed_response(response, FrigateRb::Types::Face, client: client)
     end
   end
 end

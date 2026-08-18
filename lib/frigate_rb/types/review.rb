@@ -6,9 +6,10 @@ module FrigateRb
   module Types
     class Review
       include TypeUtils
-      attr_reader :id, :camera, :start_time, :end_time, :severity, :thumb_path, :data, :has_been_reviewed
+      attr_reader :id, :camera, :start_time, :end_time, :severity, :thumb_path, :data, :has_been_reviewed, :client
 
-      def initialize(type)
+      def initialize(type, client: FrigateRb.client)
+        @client = client
         type = type.deep_symbolize_keys if type.respond_to?(:deep_symbolize_keys)
 
         @id = type[:id]
@@ -26,7 +27,7 @@ module FrigateRb
 
         ids = data[:detections]
 
-        FrigateRb::Event.find_by_ids(ids)
+        FrigateRb::Event.find_by_ids(ids, client: @client)
       end
     end
   end

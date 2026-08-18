@@ -4,15 +4,21 @@ require "faraday"
 require "faraday-cookie_jar"
 require "faraday/net_http_persistent"
 require "faraday/multipart"
-require "singleton"
-require "pry"
 
 module FrigateRb
-  # client to interact with the Frigate API
-  # here we initialize a cookie jar and a faraday connection
-  # which we use with every request, if there is no session cookie we rerun the auth
+  # Client to interact with the Frigate API.
+  #
+  # Each client carries its own Configuration, cookie jar, and Faraday
+  # connections so that multiple Frigate nodes can be used side-by-side.
+  #
+  # Create clients through the registry:
+  #
+  #   FrigateRb.client(:frigate)        # memoized
+  #   FrigateRb.client(:frigate2)       # separate memoized client
+  #
+  # For backward compatibility +Client.instance+ is kept as an alias for
+  # +FrigateRb.client(:default)+ for one release.
   class Client
-    include Singleton
     InvalidCredentials = Class.new(StandardError)
     FRIGATE_SESSION_COOKIE_NAME = "frigate_token"
     # Renew slightly before the cookie's Expires so in-flight requests don't race expiry.
@@ -21,15 +27,22 @@ module FrigateRb
     DEFAULT_SESSION_TTL = 3600
 
     attr_accessor :session_cookie, :session_expires_at
-    attr_reader :connection, :cookie_jar
+    attr_reader :connection, :cookie_jar, :configuration
 
-    def initialize(session_cookie: nil, session_expires_at: nil, streaming: false)
+    def initialize(configuration:, session_cookie: nil, session_expires_at: nil)
+      @configuration = configuration
       @session_cookie = session_cookie
       @session_expires_at = session_expires_at
 
       @cookie_jar = HTTP::CookieJar.new
 
       @connection = create_connection(@cookie_jar)
+    end
+
+    # Backward-compatibility alias — returns the +:default+ registry client.
+    # New code should use +FrigateRb.client(name)+ instead.
+    def self.instance
+      FrigateRb.client(DEFAULT_CLIENT_NAME)
     end
 
     def create_streaming_connection(jar)
@@ -86,8 +99,8 @@ module FrigateRb
       connection = self.connection
 
       payload = {
-        "user" => FrigateRb.configuration.frigate_username,
-        "password" => FrigateRb.configuration.frigate_password
+        "user" => @configuration.frigate_username,
+        "password" => @configuration.frigate_password
       }
 
       response = connection.post(
@@ -190,7 +203,7 @@ module FrigateRb
     private
 
     def connection_options(streaming: false)
-      config = FrigateRb.configuration
+      config = @configuration
       read_timeout = streaming ? config.stream_timeout : config.request_timeout
 
       {

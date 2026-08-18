@@ -3,7 +3,7 @@ module FrigateRb
     class Success
       attr_reader :message, :success
 
-      def initialize(data)
+      def initialize(data, client: nil)
         @message = data[:message]
         @success = data[:success]
       end

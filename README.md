@@ -21,7 +21,9 @@ gem install frigate_rb
 
 ## Usage
 
-Configure the gem with your credentials then go to town
+### Single instance (backward compatible)
+
+Configure the gem with your credentials then go to town:
 
 ```ruby
 FrigateRb.configure do |config|
@@ -30,17 +32,66 @@ FrigateRb.configure do |config|
   config.frigate_password = ENV['FRIGATE_PASSWORD']
 end
 
-# anything can then be called
-# auth will be done when necessary
-
+# anything can then be called — auth is done when necessary
 FrigateRb::Event.all
-
 selected_event = FrigateRb::Event.find('1759227780.368255-48pfjk')
-
 ten = FrigateRb::Event.where({limit: 10})
 ```
 
-you can then use the MQTT listener as well to process objects to this gems format
+### Multiple instances (0.2.x)
+
+Register and use multiple Frigate nodes side-by-side. Each named client
+carries its own configuration, cookie jar, and Faraday connections:
+
+```ruby
+FrigateRb.configure(:frigate) do |c|
+  c.frigate_https_url = "https://nvr1:8971"
+  c.frigate_username  = "admin"
+  c.frigate_password  = "secret"
+end
+
+FrigateRb.configure(:frigate2) do |c|
+  c.frigate_https_url = "https://nvr2:8971"
+  c.frigate_username  = "admin"
+  c.frigate_password  = "other"
+end
+
+FrigateRb.client(:frigate)   # memoized Client + cookie jar
+FrigateRb.client(:frigate2)  # separate memoized Client + cookie jar
+FrigateRb.clients            # { frigate: Client, frigate2: Client }
+
+# Pass the client explicitly — the returned object remembers it
+event = FrigateRb::Event.find(id, client: FrigateRb.client(:frigate2))
+event.mark_as_reviewed       # uses :frigate2, not :frigate
+```
+
+#### Registry helpers
+
+```ruby
+# Remove a client when its Frigate instance row is destroyed
+FrigateRb.unregister(:frigate2)
+
+# Rebuild a client after a config update (new cookie session)
+FrigateRb.reload(:frigate) { |c| c.frigate_https_url = new_url }
+
+# Clear everything (primarily for tests)
+FrigateRb.reset!
+```
+
+#### MQTT
+
+The MQTT broker stays one shared environment — configure it on the default
+(`:default`) configuration only:
+
+```ruby
+FrigateRb.configure do |c|
+  c.frigate_mqtt_url      = ENV['FRIGATE_MQTT_URL']
+  c.frigate_mqtt_username = ENV['FRIGATE_MQTT_USERNAME']
+  c.frigate_mqtt_password = ENV['FRIGATE_MQTT_PASSWORD']
+end
+```
+
+You can then use the MQTT listener to process objects into this gem's format:
 
 ```ruby
 FrigateRb::Mqtt::Listener.run do |type, object|

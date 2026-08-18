@@ -12,8 +12,10 @@ module FrigateRb
                     :retain_indefinitely, :sub_label, :top_score, :false_positive, :box, :data, :thumbnail,
                     :recognized_license_plate, :recognized_license_plate_score, :score, :current_zones,
                     :entered_zones
+      attr_reader :client
 
-      def initialize(data) # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
+      def initialize(data, client: FrigateRb.client) # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
+        @client = client
         @id = data[:id]
         @camera = data[:camera]
         @label = data[:label]
@@ -38,7 +40,7 @@ module FrigateRb
       end
 
       def clip
-        response = FrigateRb::Client.instance.get(FrigateRb::Endpoints.event_clip(id))
+        response = @client.get(FrigateRb::Endpoints.event_clip(id))
 
         return unless response.success?
 
@@ -49,11 +51,11 @@ module FrigateRb
       end
 
       def mark_as_reviewed
-        review = FrigateRb::Review.from_event(id)
+        review = FrigateRb::Review.from_event(id, client: @client)
         return unless review.is_a?(FrigateRb::Types::Review)
 
         review_id = review.id
-        FrigateRb::Review.multiple_reviewed([review_id])
+        FrigateRb::Review.multiple_reviewed([review_id], client: @client)
       end
     end
   end

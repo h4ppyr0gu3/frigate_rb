@@ -1,4 +1,56 @@
 module FrigateRb
   VERSION: String
-  # See the writing guide of rbs: https://github.com/ruby/rbs#guides
+  DEFAULT_CLIENT_NAME: Symbol
+
+  class Error < StandardError
+
+  end
+
+  class Configuration
+    attr_accessor :frigate_https_url : String
+    attr_accessor :frigate_mqtt_url : String
+    attr_accessor :frigate_username : String
+    attr_accessor :frigate_password : String
+    attr_accessor :frigate_mqtt_username : String
+    attr_accessor :frigate_mqtt_password : String
+    attr_accessor :open_timeout : Integer
+    attr_accessor :request_timeout : Integer
+    attr_accessor :stream_timeout : Integer
+  end
+
+  class Client
+    InvalidCredentials: Class[StandardError]
+    FRIGATE_SESSION_COOKIE_NAME: String
+    SESSION_RENEWAL_SKEW: Integer
+    DEFAULT_SESSION_TTL: Integer
+
+    attr_accessor :session_cookie : String?
+    attr_accessor :session_expires_at : Time?
+    attr_reader :connection : Faraday::Connection
+    attr_reader :cookie_jar : HTTP::CookieJar
+    attr_reader :configuration : Configuration
+
+    def initialize: (configuration: Configuration, ?session_cookie: String?, ?session_expires_at: Time?) -> void
+    def self.instance: -> Client
+    def create_streaming_connection: (HTTP::CookieJar jar) -> Faraday::Connection
+    def create_multipart_connection: (HTTP::CookieJar jar) -> Faraday::Connection
+    def create_connection: (HTTP::CookieJar jar) -> Faraday::Connection
+    def post_file: (String path, File file, ?String type) -> Faraday::Response
+    def authenticate: -> Faraday::Connection
+    def get: (String path, ?params: untyped, ?headers: untyped) -> Faraday::Response
+    def post: (String path, ?body: untyped, ?headers: untyped) -> Faraday::Response
+    def stream: (String path, ?params: untyped, ?range_header: String?) { (untyped, untyped) -> void } -> void
+    def session_valid?: -> bool
+    def ensure_authenticated!: -> void
+    def extract_session_details: -> self
+  end
+
+  def self.configure: (?Symbol name) { (Configuration) -> void } -> void
+  def self.configuration: (?Symbol name) -> Configuration
+  def self.client: (?Symbol name) -> Client
+  def self.clients: -> Hash[Symbol, Client]
+  def self.configurations: -> Hash[Symbol, Configuration]
+  def self.unregister: (Symbol name) -> void
+  def self.reload: (?Symbol name) ?{ (Configuration) -> void } -> Client
+  def self.reset!: -> void
 end
